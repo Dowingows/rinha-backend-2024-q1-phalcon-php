@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS transacoes (
     valor INT,
     tipo CHAR(1),
     cliente_id INT,
-    descricao CHAR(10),
+    descricao VARCHAR(10),
     realizada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
@@ -26,7 +26,7 @@ INSERT INTO clientes (limite, saldo) VALUES
 CREATE OR REPLACE PROCEDURE realizar_transacao(
     IN p_cliente_id INT,
     IN p_valor INT,
-    IN p_descricao CHAR(10),
+    IN p_descricao VARCHAR(10),
     IN p_tipo CHAR(1)
 )
 LANGUAGE plpgsql
