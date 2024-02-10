@@ -23,6 +23,14 @@ INSERT INTO clientes (limite, saldo) VALUES
 (500000, 0);
 
 
+CREATE OR REPLACE PROCEDURE realizar_transacao(
+    IN p_cliente_id INT,
+    IN p_valor INT,
+    IN p_descricao CHAR(10),
+    IN p_tipo CHAR(1)
+)
+LANGUAGE plpgsql
+AS $$
 DECLARE
     v_saldo_atual INT;
     v_limite INT;
@@ -31,7 +39,7 @@ BEGIN
     SELECT saldo, limite INTO v_saldo_atual, v_limite
     FROM clientes
     WHERE id = p_cliente_id
-    FOR UPDATE; -- Adquire bloqueio exclusivo
+    FOR UPDATE; 
 
     IF p_tipo = 'd' THEN
         IF (v_saldo_atual - p_valor) < (-v_limite) THEN
@@ -54,7 +62,8 @@ BEGIN
     ELSE
         RAISE EXCEPTION 'Transação inválida!';
     END IF;
-	
-	COMMIT;
-	
+
+    COMMIT;
+
 END;
+$$;
