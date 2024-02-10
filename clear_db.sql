@@ -1,0 +1,1 @@
+UPDATE clientes SET saldo=0;

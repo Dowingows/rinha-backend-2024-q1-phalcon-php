@@ -23,7 +23,40 @@ INSERT INTO clientes (limite, saldo) VALUES
 (500000, 0);
 
 
-CREATE OR REPLACE PROCEDURE realizar_transacao(
+DECLARE
+    v_saldo_atual INT;
+    v_limite INT;
+BEGIN
+
+    SELECT saldo, limite INTO v_saldo_atual, v_limite
+    FROM clientes
+    WHERE id = p_cliente_id
+    FOR UPDATE;
+
+    IF p_tipo = 'd' THEN
+        IF (v_saldo_atual - p_valor) < (-v_limite) THEN
+            RAISE EXCEPTION 'Limite disponível atingido!';
+        ELSE
+            UPDATE clientes
+            SET saldo = saldo - p_valor
+            WHERE id = p_cliente_id;
+
+            INSERT INTO transacoes (valor, tipo, cliente_id, descricao)
+            VALUES (p_valor, 'd', p_cliente_id, p_descricao);
+        END IF;
+    ELSIF p_tipo = 'c' THEN
+        UPDATE clientes
+        SET saldo = saldo + p_valor
+        WHERE id = p_cliente_id;
+
+        INSERT INTO transacoes (valor, tipo, cliente_id, descricao)
+        VALUES (p_valor, 'c', p_cliente_id, p_descricao);
+    ELSE
+        RAISE EXCEPTION 'Transação inválida!';
+    END IF;
+	
+	COMMIT;
+	CREATE OR REPLACE PROCEDURE realizar_transacao(
     IN p_cliente_id INT,
     IN p_valor INT,
     IN p_descricao CHAR(10),
@@ -63,3 +96,5 @@ BEGIN
     END IF;
 END;
 $$;
+
+END;
