@@ -5,7 +5,7 @@ FROM php:8.3-fpm
 ENV PHP_VERSION=8.3
 
 # desabilita os logs de acesso do PHP-FPM
-# RUN echo "access.log = /dev/null" >> /usr/local/etc/php-fpm.d/www.conf
+RUN echo "access.log = /dev/null" >> /usr/local/etc/php-fpm.d/www.conf
 
 RUN apt-get update
 RUN apt-get install -y libzip-dev
@@ -33,13 +33,6 @@ RUN mkdir -p /var/log/php \
   && chown www-data:www-data /var/log/php
 
 
-# Install psr
-# RUN cd /tmp \
-#     && curl -LO https://github.com/jbboehr/php-psr/archive/v${PSR_VERSION}.tar.gz \
-#     && tar xzf /tmp/v${PSR_VERSION}.tar.gz \
-#     && docker-php-ext-install -j $(getconf _NPROCESSORS_ONLN) /tmp/php-psr-${PSR_VERSION} \
-#     && rm -r /tmp/v${PSR_VERSION}.tar.gz /tmp/php-psr-${PSR_VERSION}
-
 # Install phalcon
 ENV PHALCON_VERSION=5.6.0
 
@@ -53,14 +46,6 @@ RUN cd /tmp \
 
 # Import fpm config file
 COPY docker/php/www.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
-
-# Import composer and run dump
-COPY --from=composer:2.5 /usr/bin/composer /usr/local/bin/composer
-# COPY composer.lock composer.json /var/www/html/
-
-# Import setup script
-COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
 
 COPY . /var/www/html
 

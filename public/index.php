@@ -55,7 +55,7 @@ class Service
     unset($saldo['saldo']); 
     $saldo['data_extrato'] = (new \DateTime('now'))->format('Y-m-d\TH:i:s.u\Z');
     $extrato = ['saldo' =>$saldo];
-    $sql = "SELECT valor, tipo, descricao, TO_CHAR(realizada_em, 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') AS realizada_em FROM transacoes where cliente_id = " . $id . " ORDER BY realizada_em DESC";
+    $sql = "SELECT valor, tipo, descricao, TO_CHAR(realizada_em, 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') AS realizada_em FROM transacoes where cliente_id = " . $id . " ORDER BY realizada_em DESC LIMIT 10";
     $extrato['ultimas_transacoes'] =  $this->connection->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
     return $extrato;
@@ -101,9 +101,9 @@ $app->post(
       return (new Response())->setStatusCode(422);
     }
 
-    //pega saldo atualizado
+    // $client['saldo'] =  $payload->tipo === 'c' ? $client['saldo'] + $payload->valor : $client['saldo'] - $payload->valor  ;
     $client = $service->getClienteSaldoInfo($id);
-
+    
     return (new Response())
       ->setStatusCode(200)
       ->setContentType('application/json')
