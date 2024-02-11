@@ -4,6 +4,9 @@ FROM php:8.3-fpm
 
 ENV PHP_VERSION=8.3
 
+# Import fpm config file
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
 # desabilita os logs de acesso do PHP-FPM
 RUN echo "access.log = /dev/null" >> /usr/local/etc/php-fpm.d/www.conf
 
@@ -44,12 +47,15 @@ RUN cd /tmp \
     && docker-php-ext-enable phalcon \
     && rm -r /tmp/v${PHALCON_VERSION}.tar.gz /tmp/cphalcon-${PHALCON_VERSION}
 
-# Import fpm config file
-COPY docker/php/www.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+
 
 COPY . /var/www/html
 
 WORKDIR /var/www/html
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+RUN sed -i '/^\[opcache\]/a opcache.enable=1\nopcache.revalidate_freq=0\nopcache.validate_timestamps=1\nopcache.max_accelerated_files=20000\nopcache.memory_consumption=384\nopcache.max_wasted_percentage=10\nopcache.interned_strings_buffer=16\nopcache.fast_shutdown=1\nopcache.jit_buffer_size=200M\nopcache.jit=1235\nopcache.jit_debug=0' "$PHP_INI_DIR/php.ini"
 
 # Start services
 # ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

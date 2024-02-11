@@ -7,11 +7,11 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '0.6'
-    #       memory: '0.5GB'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: '150MB'
 
     networks:
       - rinha-net
@@ -40,11 +40,11 @@ services:
     ports:
       - "9999:9999"
       
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '0.25'
-    #       memory: '0.3GB'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: '50MB'
     
   db:
     container_name: db
@@ -68,25 +68,34 @@ services:
     ports:
       - "5432:5432"
 
-    # deploy:
-    #     resources:
-    #         limits:
-    #             cpus: '0.3'
-    #             memory: '1.5GB'
+    deploy:
+        resources:
+          limits:
+              cpus: '0.7'
+              memory: '200MB'
 
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "8081:80"
-    networks:
-      - rinha-net
+    cache:
+      image: redis:6.2-alpine
+      restart: always
+      ports:
+        - '6379:6379'
+      command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+      volumes: 
+        - cache:/data
 
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
+  # pgadmin:
+  #   container_name: pgadmin
+  #   image: dpage/pgadmin4:latest
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "8081:80"
+  #   networks:
+  #     - rinha-net
+
+  #   volumes:
+  #     - pgadmin-data:/var/lib/pgadmin
                 
 volumes:
   db-data:
