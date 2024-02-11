@@ -61,9 +61,12 @@ class Service
     return $extrato;
   }
 
-  public function realizarTransacao(int $clientId, int $valor, string $descricao, string $tipo): void
+  public function realizarTransacao(int $clientId, int $valor, string $descricao, string $tipo): int
   {
-    $this->connection->query("CALL realizar_transacao({$clientId}, {$valor}, '{$descricao}', '{$tipo}')");
+    $result = $this->connection->query("SELECT realizar_transacao({$clientId}, {$valor}, '{$descricao}', '{$tipo}')");
+    $info = $result->fetch(PDO::FETCH_ASSOC);
+   
+    return preg_replace('/\((.*?)\)/', '$1', $info['realizar_transacao']);
   }
 }
 
@@ -96,13 +99,13 @@ $app->post(
    
 
     try {
-      $service->realizarTransacao($id, $payload->valor, $payload->descricao, $payload->tipo);
+      $client['saldo'] = $service->realizarTransacao($id, $payload->valor, $payload->descricao, $payload->tipo);
     } catch (Exception $e) {
       return (new Response())->setStatusCode(422);
     }
 
     // $client['saldo'] =  $payload->tipo === 'c' ? $client['saldo'] + $payload->valor : $client['saldo'] - $payload->valor  ;
-    $client = $service->getClienteSaldoInfo($id);
+    // $client = $service->getClienteSaldoInfo($id);
     
     return (new Response())
       ->setStatusCode(200)
