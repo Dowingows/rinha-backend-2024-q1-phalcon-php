@@ -74,15 +74,6 @@ services:
               cpus: '0.7'
               memory: '200MB'
 
-    cache:
-      image: redis:6.2-alpine
-      restart: always
-      ports:
-        - '6379:6379'
-      command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
-      volumes: 
-        - cache:/data
-
   # pgadmin:
   #   container_name: pgadmin
   #   image: dpage/pgadmin4:latest
