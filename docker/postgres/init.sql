@@ -1,17 +1,16 @@
-CREATE TABLE IF NOT EXISTS clientes (
+CREATE UNLOGGED TABLE clientes (
     id SERIAL PRIMARY KEY,
     limite INT,
     saldo INT
 );
 
-CREATE TABLE IF NOT EXISTS transacoes (
+CREATE UNLOGGED TABLE transacoes (
     id SERIAL PRIMARY KEY,
     valor INT,
     tipo CHAR(1),
     cliente_id INT,
     descricao VARCHAR(10),
-    realizada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    realizada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
