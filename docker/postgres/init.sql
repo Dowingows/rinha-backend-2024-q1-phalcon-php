@@ -15,7 +15,7 @@ CREATE UNLOGGED TABLE transacoes (
 
 
 CREATE INDEX idx_cliente_id_transacoes ON transacoes (cliente_id);
-CREATE INDEX idx_realizada_em_transacoes ON transacoes (realizada_em);
+CREATE INDEX idx_realizada_em_transacoes ON transacoes (realizada_em DESC);
 
 
 INSERT INTO clientes (limite, saldo) VALUES
