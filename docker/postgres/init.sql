@@ -9,10 +9,14 @@ CREATE TABLE IF NOT EXISTS transacoes (
     valor INT,
     tipo CHAR(1),
     cliente_id INT,
-    descricao CHAR(10),
+    descricao VARCHAR(10),
     realizada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
+
+
+CREATE INDEX idx_cliente_id_transacoes ON transacoes (cliente_id);
+CREATE INDEX idx_realizada_em_transacoes ON transacoes (realizada_em);
 
 
 INSERT INTO clientes (limite, saldo) VALUES
@@ -23,22 +27,23 @@ INSERT INTO clientes (limite, saldo) VALUES
 (500000, 0);
 
 
-CREATE OR REPLACE PROCEDURE realizar_transacao(
+CREATE OR REPLACE FUNCTION realizar_transacao(
     IN p_cliente_id INT,
     IN p_valor INT,
-    IN p_descricao CHAR(10),
+    IN p_descricao VARCHAR(10),
     IN p_tipo CHAR(1)
 )
-LANGUAGE plpgsql
-AS $$
+RETURNS RECORD AS $$
 DECLARE
     v_saldo_atual INT;
     v_limite INT;
+    ret RECORD;
 BEGIN
 
     SELECT saldo, limite INTO v_saldo_atual, v_limite
     FROM clientes
-    WHERE id = p_cliente_id;
+    WHERE id = p_cliente_id
+    FOR UPDATE; 
 
     IF p_tipo = 'd' THEN
         IF (v_saldo_atual - p_valor) < (-v_limite) THEN
@@ -46,7 +51,8 @@ BEGIN
         ELSE
             UPDATE clientes
             SET saldo = saldo - p_valor
-            WHERE id = p_cliente_id;
+            WHERE id = p_cliente_id 
+            RETURNING saldo INTO ret;
 
             INSERT INTO transacoes (valor, tipo, cliente_id, descricao)
             VALUES (p_valor, 'd', p_cliente_id, p_descricao);
@@ -54,12 +60,15 @@ BEGIN
     ELSIF p_tipo = 'c' THEN
         UPDATE clientes
         SET saldo = saldo + p_valor
-        WHERE id = p_cliente_id;
+        WHERE id = p_cliente_id
+        RETURNING saldo INTO ret;
 
         INSERT INTO transacoes (valor, tipo, cliente_id, descricao)
         VALUES (p_valor, 'c', p_cliente_id, p_descricao);
     ELSE
         RAISE EXCEPTION 'Transação inválida!';
     END IF;
+
+    RETURN ret;
 END;
-$$;
+$$ LANGUAGE plpgsql;
