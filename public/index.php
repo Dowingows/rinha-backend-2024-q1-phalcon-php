@@ -24,7 +24,7 @@ class Service
     ];
     
 
-    $this->connection = $connection = new Postgresql($config);
+    $this->connection = new Postgresql($config);
   }
 
   public function getClienteSaldoInfo(int $id): ?array

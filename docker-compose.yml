@@ -62,7 +62,8 @@ services:
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     
     # command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
-    command: postgres -c 'max_connections=450' -c 'log_error_verbosity=terse'
+    # command: postgres -c 'max_connections=450' -c 'log_error_verbosity=terse'
+    command: postgres -c 'max_connections=450'
     networks:
       - rinha-net
 
