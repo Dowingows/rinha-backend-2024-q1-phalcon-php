@@ -19,7 +19,8 @@ class Service
       'username' => getenv('DB_USER'),
       'password' => getenv('DB_PASSWORD'),
       'dbname'   => getenv('DB_NAME'),
-      'schema' => 'public'
+      'schema' => 'public',
+      "options"    => [\PDO::ATTR_PERSISTENT => 1]
     ];
     
 
