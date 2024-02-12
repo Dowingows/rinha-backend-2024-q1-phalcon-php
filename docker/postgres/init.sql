@@ -51,7 +51,7 @@ BEGIN
             UPDATE clientes
             SET saldo = saldo - p_valor
             WHERE id = p_cliente_id 
-            RETURNING saldo INTO ret;
+            RETURNING saldo, limite INTO ret;
 
             INSERT INTO transacoes (valor, tipo, cliente_id, descricao)
             VALUES (p_valor, 'd', p_cliente_id, p_descricao);
@@ -60,7 +60,7 @@ BEGIN
         UPDATE clientes
         SET saldo = saldo + p_valor
         WHERE id = p_cliente_id
-        RETURNING saldo INTO ret;
+        RETURNING saldo, limite INTO ret;
 
         INSERT INTO transacoes (valor, tipo, cliente_id, descricao)
         VALUES (p_valor, 'c', p_cliente_id, p_descricao);
