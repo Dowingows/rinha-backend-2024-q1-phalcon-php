@@ -62,12 +62,15 @@ class Service
     return $extrato;
   }
 
-  public function realizarTransacao(int $clientId, int $valor, string $descricao, string $tipo): int
+  public function realizarTransacao(int $clientId, int $valor, string $descricao, string $tipo): array
   {
     $result = $this->connection->query("SELECT realizar_transacao({$clientId}, {$valor}, '{$descricao}', '{$tipo}')");
     $info = $result->fetch(PDO::FETCH_ASSOC);
+
+    preg_match('/(-?\d+),\s*(-?\d+)/', $info['realizar_transacao'], $matches);
+    list(, $saldo, $limite) = $matches;
+    return [(int) $saldo, (int) $limite];
    
-    return preg_replace('/\((.*?)\)/', '$1', $info['realizar_transacao']);
   }
 }
 
@@ -80,9 +83,9 @@ $app->post(
 
     //cliente não existe deve retornar 404
     $service = $app->getDI()->get('service');
-    $client = $service->getClienteSaldoInfo($id);
+    // $client = $service->getClienteSaldoInfo($id);
 
-    if (!$client) {
+    if ($id < 0 || $id > 5) {
       return (new Response())
         ->setStatusCode(404);
     }
@@ -100,7 +103,8 @@ $app->post(
    
 
     try {
-      $client['saldo'] = $service->realizarTransacao($id, $payload->valor, $payload->descricao, $payload->tipo);
+      // $client['saldo'] = $service->realizarTransacao($id, $payload->valor, $payload->descricao, $payload->tipo);
+      list($saldo, $limite) = $service->realizarTransacao($id, $payload->valor, $payload->descricao, $payload->tipo);
     } catch (Exception $e) {
       return (new Response())->setStatusCode(422);
     }
@@ -111,7 +115,7 @@ $app->post(
     return (new Response())
       ->setStatusCode(200)
       ->setContentType('application/json')
-      ->setContent(json_encode($client, true));
+      ->setContent(json_encode(['saldo' => $saldo,'limite'=> $limite], true));
   }
 );
 

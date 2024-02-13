@@ -1,23 +1,22 @@
-CREATE TABLE IF NOT EXISTS clientes (
+CREATE UNLOGGED TABLE clientes (
     id SERIAL PRIMARY KEY,
     limite INT,
     saldo INT
 );
 
-CREATE TABLE IF NOT EXISTS transacoes (
+CREATE UNLOGGED TABLE transacoes (
     id SERIAL PRIMARY KEY,
     valor INT,
     tipo CHAR(1),
     cliente_id INT,
     descricao VARCHAR(10),
-    realizada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    realizada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
-CREATE INDEX idx_cliente_id_transacoes ON transacoes (cliente_id);
-CREATE INDEX idx_realizada_em_transacoes ON transacoes (realizada_em);
-
+-- CREATE INDEX idx_cliente_id_transacoes ON transacoes (cliente_id);
+-- CREATE INDEX idx_realizada_em_transacoes ON transacoes (realizada_em DESC);
+CREATE INDEX idx_cliente_e_suas_transacoes ON transacoes (cliente_id, realizada_em DESC);
 
 INSERT INTO clientes (limite, saldo) VALUES
 (100000, 0),
@@ -52,7 +51,7 @@ BEGIN
             UPDATE clientes
             SET saldo = saldo - p_valor
             WHERE id = p_cliente_id 
-            RETURNING saldo INTO ret;
+            RETURNING saldo, limite INTO ret;
 
             INSERT INTO transacoes (valor, tipo, cliente_id, descricao)
             VALUES (p_valor, 'd', p_cliente_id, p_descricao);
@@ -61,7 +60,7 @@ BEGIN
         UPDATE clientes
         SET saldo = saldo + p_valor
         WHERE id = p_cliente_id
-        RETURNING saldo INTO ret;
+        RETURNING saldo, limite INTO ret;
 
         INSERT INTO transacoes (valor, tipo, cliente_id, descricao)
         VALUES (p_valor, 'c', p_cliente_id, p_descricao);
