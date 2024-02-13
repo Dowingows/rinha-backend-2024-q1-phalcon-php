@@ -4,11 +4,6 @@ FROM php:8.3-fpm
 
 ENV PHP_VERSION=8.3
 
-# Import fpm config file
-COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
-
-# desabilita os logs de acesso do PHP-FPM
-RUN echo "access.log = /dev/null" >> /usr/local/etc/php-fpm.d/www.conf
 
 RUN apt-get update
 RUN apt-get install -y libzip-dev
@@ -27,9 +22,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions
 # Install PHP extensions
 #RUN install-php-extensions xdebug pdo_mysql zip
 
-# Add logs error for php-fpm
-RUN echo "error_log = /var/log/php/error.log" >> /usr/local/etc/php/php.ini \
-  && echo "log_errors = On" >> /usr/local/etc/php/php.ini
+
 
 RUN mkdir -p /var/log/php \
   && touch /var/log/php/error.log \
@@ -47,6 +40,15 @@ RUN cd /tmp \
     && docker-php-ext-enable phalcon \
     && rm -r /tmp/v${PHALCON_VERSION}.tar.gz /tmp/cphalcon-${PHALCON_VERSION}
 
+# Import fpm config file
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Add logs error for php-fpm
+RUN echo "error_log = /var/log/php/error.log" >> /usr/local/etc/php/php.ini \
+  && echo "log_errors = On" >> /usr/local/etc/php/php.ini
+  
+# desabilita os logs de acesso do PHP-FPM
+RUN echo "access.log = /dev/null" >> /usr/local/etc/php-fpm.d/www.conf
 
 
 COPY . /var/www/html
