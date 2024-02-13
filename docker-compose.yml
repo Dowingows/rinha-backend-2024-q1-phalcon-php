@@ -11,7 +11,7 @@ services:
       resources:
         limits:
           cpus: '0.3'
-          memory: '100MB'
+          memory: '110MB'
 
     networks:
       - rinha-net
@@ -43,8 +43,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.2'
-          memory: '50MB'
+          cpus: '0.3'
+          memory: '30MB'
     
   db:
     container_name: db
@@ -72,7 +72,7 @@ services:
     deploy:
         resources:
           limits:
-              cpus: '0.7'
+              cpus: '0.6'
               memory: '300MB'
 
   # pgadmin:
